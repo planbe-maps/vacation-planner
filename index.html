@@ -39,8 +39,8 @@
             margin: 0 auto;
         }
 
-        /* Profile Selector */
-        .profile-selector {
+        /* Login Page */
+        .login-page {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -105,41 +105,46 @@
             }
         }
 
-        .profile-buttons {
+        .name-input-container {
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 15px;
             z-index: 1;
+            width: 100%;
+            max-width: 300px;
         }
 
-        .profile-btn {
-            padding: 20px 45px;
-            font-size: 1.4em;
+        .name-input {
+            padding: 18px 25px;
+            font-size: 1.3em;
+            border: 3px solid #ddd;
+            border-radius: 50px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .name-input:focus {
+            border-color: #9b59b6;
+            box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.2);
+        }
+
+        .start-btn {
+            padding: 18px 45px;
+            font-size: 1.3em;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
             box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-
-        .profile-btn.alma {
-            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            background: linear-gradient(135deg, #9b59b6 0%, #e91e8c 100%);
             color: white;
         }
 
-        .profile-btn.natalie {
-            background: linear-gradient(135deg, #ff69b4 0%, #e91e8c 100%);
-            color: white;
-        }
-
-        .profile-btn:hover {
+        .start-btn:hover {
             transform: translateY(-4px) scale(1.05);
             box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
-
-        .profile-btn.active {
-            transform: scale(1.08);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
         }
 
         /* Header */
@@ -526,10 +531,10 @@
 </head>
 <body>
     <div class="container">
-        <!-- Profile Selector -->
-        <div class="profile-selector" id="profile-selector">
+        <!-- Login Page -->
+        <div class="login-page" id="login-page">
             <div class="welcome-title">🌴 School Break Planner 🌴</div>
-            <div class="welcome-subtitle">Who's planning today?</div>
+            <div class="welcome-subtitle">What's your name?</div>
             <div class="floating-emojis">
                 <span class="float-emoji" style="--delay: 0s; --x: 20%;">☀️</span>
                 <span class="float-emoji" style="--delay: 1s; --x: 40%;">🎨</span>
@@ -538,15 +543,15 @@
                 <span class="float-emoji" style="--delay: 1.5s; --x: 30%;">🎲</span>
                 <span class="float-emoji" style="--delay: 2.5s; --x: 70%;">🌳</span>
             </div>
-            <div class="profile-buttons">
-                <button class="profile-btn alma" onclick="switchProfile('alma')">⭐ Alma</button>
-                <button class="profile-btn natalie" onclick="switchProfile('natalie')">🌸 Natalie</button>
+            <div class="name-input-container">
+                <input type="text" id="name-input" class="name-input" placeholder="Enter your name" maxlength="20" onkeypress="if(event.key === 'Enter') submitName()">
+                <button class="start-btn" onclick="submitName()">Let's Go! 🚀</button>
             </div>
         </div>
 
         <!-- Main App -->
         <div id="main-app" style="display: none;">
-            <button class="switch-btn" onclick="showProfileSelector()">← Switch</button>
+            <button class="switch-btn" onclick="showLoginPage()">← Switch</button>
             <div class="header">
                 <h1 id="header-title">My Planner</h1>
                 <p class="subtitle">March 19 - April 19</p>
@@ -701,22 +706,13 @@
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const dayNamesMonFirst = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-        const dailyAnchors = {
-            alma: [
-                { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
-                { id: 'outdoor', emoji: '☀️', text: 'Outside Fun', time: '' },
-                { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
-                { id: 'screenfree', emoji: '🎨', text: 'Unplugged Time', time: '' },
-                { id: 'evening', emoji: '🌙', text: 'Wind Down', time: 'Journal, drawing, or music' }
-            ],
-            natalie: [
-                { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
-                { id: 'outdoor', emoji: '☀️', text: 'Outside Fun', time: '' },
-                { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
-                { id: 'screenfree', emoji: '🎨', text: 'Unplugged Time', time: '' },
-                { id: 'evening', emoji: '🌙', text: 'Wind Down', time: 'Quiet play time' }
-            ]
-        };
+        const dailyAnchors = [
+            { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
+            { id: 'outdoor', emoji: '☀️', text: 'Outside Fun', time: '' },
+            { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
+            { id: 'screenfree', emoji: '🎨', text: 'Unplugged Time', time: '' },
+            { id: 'evening', emoji: '🌙', text: 'Wind Down', time: '' }
+        ];
 
         const weeklyAnchors = [
             { id: 'cooking', emoji: '👩‍🍳', text: 'Cooking Adventure', desc: 'Make something yummy together' },
@@ -742,43 +738,52 @@
         // State
         let currentProfile = null;
         let currentWeek = 0;
-        let currentDate = null; // Will store the actual date object
-        let data = {
-            alma: { daily: {}, weekly: {}, weeklyDone: {} },
-            natalie: { daily: {}, weekly: {}, weeklyDone: {} }
-        };
+        let currentDate = null;
+        let data = { daily: {}, weekly: {}, weeklyDone: {} };
 
         // Load data from localStorage
         function loadData() {
-            const saved = localStorage.getItem('vacationPlannerV2');
-            if (saved) {
-                data = JSON.parse(saved);
-                if (!data.alma.weeklyDone) data.alma.weeklyDone = {};
-                if (!data.natalie.weeklyDone) data.natalie.weeklyDone = {};
+            const savedProfile = localStorage.getItem('vacationPlannerProfile');
+            const savedData = localStorage.getItem('vacationPlannerData');
+            if (savedData) {
+                data = JSON.parse(savedData);
+                if (!data.weeklyDone) data.weeklyDone = {};
             }
+            return savedProfile;
         }
 
         // Save data to localStorage
         function saveData() {
-            localStorage.setItem('vacationPlannerV2', JSON.stringify(data));
+            localStorage.setItem('vacationPlannerData', JSON.stringify(data));
         }
 
-        // Switch profile
-        function switchProfile(profile) {
-            currentProfile = profile;
+        // Save profile name
+        function saveProfile(name) {
+            localStorage.setItem('vacationPlannerProfile', name);
+        }
 
-            document.querySelectorAll('.profile-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`.profile-btn.${profile}`).classList.add('active');
+        // Submit name and start
+        function submitName() {
+            const nameInput = document.getElementById('name-input');
+            const name = nameInput.value.trim();
+            if (!name) {
+                nameInput.focus();
+                return;
+            }
+            saveProfile(name);
+            startPlanner(name);
+        }
 
-            document.body.className = `theme-${profile}`;
+        // Start the planner with given name
+        function startPlanner(name) {
+            currentProfile = name;
 
-            const name = profile === 'alma' ? "Alma's Planner" : "Natalie's Planner";
-            document.getElementById('header-title').textContent = name;
+            document.body.className = 'theme-alma'; // Use purple theme for everyone
+
+            document.getElementById('header-title').textContent = name + "'s Planner";
 
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('profile-selector').style.display = 'none';
+            document.getElementById('login-page').style.display = 'none';
 
             // Set to current week if within vacation, otherwise first week
             currentWeek = getCurrentWeekIndex();
@@ -892,8 +897,8 @@
 
             // Daily tasks
             const tasksContainer = document.getElementById('daily-tasks');
-            const anchors = dailyAnchors[currentProfile];
-            const dayData = data[currentProfile].daily[dateKey] || {};
+            const anchors = dailyAnchors;
+            const dayData = data.daily[dateKey] || {};
 
             tasksContainer.innerHTML = anchors.map(anchor => {
                 const isCompleted = dayData[anchor.id] || false;
@@ -911,12 +916,12 @@
 
             // Placed weekly activities
             const placedContainer = document.getElementById('placed-activities');
-            const placed = data[currentProfile].weekly[dateKey] || [];
+            const placed = data.weekly[dateKey] || [];
 
             if (placed.length === 0) {
                 placedContainer.innerHTML = '<div class="empty-state">No special activities yet</div>';
             } else {
-                const weeklyDone = data[currentProfile].weeklyDone[dateKey] || {};
+                const weeklyDone = data.weeklyDone[dateKey] || {};
                 placedContainer.innerHTML = placed.map(anchorId => {
                     const anchor = weeklyAnchors.find(a => a.id === anchorId);
                     if (!anchor) return '';
@@ -940,8 +945,8 @@
         // Update progress bar
         function updateProgress() {
             const dateKey = getCurrentDateKey();
-            const anchors = dailyAnchors[currentProfile];
-            const dayData = data[currentProfile].daily[dateKey] || {};
+            const anchors = dailyAnchors;
+            const dayData = data.daily[dateKey] || {};
             const completed = anchors.filter(a => dayData[a.id]).length;
             const total = anchors.length;
             const percent = (completed / total) * 100;
@@ -954,7 +959,7 @@
         function renderWeeklyList() {
             const select = document.getElementById('activity-select');
             const dateKey = getCurrentDateKey();
-            const placed = data[currentProfile].weekly[dateKey] || [];
+            const placed = data.weekly[dateKey] || [];
 
             select.innerHTML = '<option value="">+ Add an activity...</option>' +
                 weeklyAnchors.map(anchor => {
@@ -970,11 +975,11 @@
             if (!anchorId) return;
 
             const dateKey = getCurrentDateKey();
-            if (!data[currentProfile].weekly[dateKey]) {
-                data[currentProfile].weekly[dateKey] = [];
+            if (!data.weekly[dateKey]) {
+                data.weekly[dateKey] = [];
             }
 
-            const placed = data[currentProfile].weekly[dateKey];
+            const placed = data.weekly[dateKey];
             if (placed.includes(anchorId)) {
                 return;
             }
@@ -995,10 +1000,10 @@
         // Remove placed activity
         function removePlaced(anchorId) {
             const dateKey = getCurrentDateKey();
-            const placed = data[currentProfile].weekly[dateKey] || [];
-            data[currentProfile].weekly[dateKey] = placed.filter(id => id !== anchorId);
-            if (data[currentProfile].weeklyDone[dateKey]) {
-                delete data[currentProfile].weeklyDone[dateKey][anchorId];
+            const placed = data.weekly[dateKey] || [];
+            data.weekly[dateKey] = placed.filter(id => id !== anchorId);
+            if (data.weeklyDone[dateKey]) {
+                delete data.weeklyDone[dateKey][anchorId];
             }
             saveData();
             renderDay();
@@ -1008,10 +1013,10 @@
         // Toggle daily task
         function toggleDaily(anchorId) {
             const dateKey = getCurrentDateKey();
-            if (!data[currentProfile].daily[dateKey]) {
-                data[currentProfile].daily[dateKey] = {};
+            if (!data.daily[dateKey]) {
+                data.daily[dateKey] = {};
             }
-            data[currentProfile].daily[dateKey][anchorId] = !data[currentProfile].daily[dateKey][anchorId];
+            data.daily[dateKey][anchorId] = !data.daily[dateKey][anchorId];
             saveData();
             renderDay();
         }
@@ -1019,10 +1024,10 @@
         // Toggle weekly activity done
         function toggleWeeklyDone(anchorId) {
             const dateKey = getCurrentDateKey();
-            if (!data[currentProfile].weeklyDone[dateKey]) {
-                data[currentProfile].weeklyDone[dateKey] = {};
+            if (!data.weeklyDone[dateKey]) {
+                data.weeklyDone[dateKey] = {};
             }
-            data[currentProfile].weeklyDone[dateKey][anchorId] = !data[currentProfile].weeklyDone[dateKey][anchorId];
+            data.weeklyDone[dateKey][anchorId] = !data.weeklyDone[dateKey][anchorId];
             saveData();
             renderDay();
         }
@@ -1031,23 +1036,28 @@
         function clearDayData() {
             if (confirm('Start fresh? This will clear today\'s tasks and activities.')) {
                 const dateKey = getCurrentDateKey();
-                data[currentProfile].daily[dateKey] = {};
-                data[currentProfile].weekly[dateKey] = [];
-                data[currentProfile].weeklyDone[dateKey] = {};
+                data.daily[dateKey] = {};
+                data.weekly[dateKey] = [];
+                data.weeklyDone[dateKey] = {};
                 saveData();
                 renderDay();
                 renderWeeklyList();
             }
         }
 
-        // Show profile selector again
-        function showProfileSelector() {
-            document.getElementById('profile-selector').style.display = 'flex';
+        // Show login page again
+        function showLoginPage() {
+            localStorage.removeItem('vacationPlannerProfile');
+            document.getElementById('login-page').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
+            document.getElementById('name-input').value = '';
         }
 
         // Initialize
-        loadData();
+        const savedProfile = loadData();
+        if (savedProfile) {
+            startPlanner(savedProfile);
+        }
     </script>
 </body>
 </html>
