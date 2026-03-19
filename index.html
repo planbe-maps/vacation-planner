@@ -42,20 +42,84 @@
         /* Profile Selector */
         .profile-selector {
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            margin-bottom: 25px;
+            min-height: 80vh;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-title {
+            font-size: 2.2em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #9b59b6 0%, #e91e8c 50%, #9b59b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        .floating-emojis {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .float-emoji {
+            position: absolute;
+            font-size: 2em;
+            left: var(--x);
+            animation: floatUp 4s ease-in-out infinite;
+            animation-delay: var(--delay);
+            opacity: 0.6;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% {
+                transform: translateY(-20vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .profile-buttons {
+            display: flex;
+            gap: 20px;
+            z-index: 1;
         }
 
         .profile-btn {
-            padding: 15px 35px;
-            font-size: 1.3em;
+            padding: 20px 45px;
+            font-size: 1.4em;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
 
         .profile-btn.alma {
@@ -69,8 +133,8 @@
         }
 
         .profile-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         }
 
         .profile-btn.active {
@@ -96,9 +160,11 @@
         }
 
         .switch-btn {
-            margin-top: 10px;
-            padding: 6px 16px;
-            background: transparent;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 16px;
+            background: white;
             border: 2px solid var(--primary);
             color: var(--primary);
             border-radius: 20px;
@@ -106,6 +172,7 @@
             font-size: 0.85em;
             font-weight: 600;
             transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .switch-btn:hover {
@@ -459,16 +526,28 @@
     <div class="container">
         <!-- Profile Selector -->
         <div class="profile-selector" id="profile-selector">
-            <button class="profile-btn alma" onclick="switchProfile('alma')">⭐ Alma</button>
-            <button class="profile-btn natalie" onclick="switchProfile('natalie')">🌸 Natalie</button>
+            <div class="welcome-title">🌴 School Break Planner 🌴</div>
+            <div class="welcome-subtitle">Who's planning today?</div>
+            <div class="floating-emojis">
+                <span class="float-emoji" style="--delay: 0s; --x: 20%;">☀️</span>
+                <span class="float-emoji" style="--delay: 1s; --x: 40%;">🎨</span>
+                <span class="float-emoji" style="--delay: 2s; --x: 60%;">📚</span>
+                <span class="float-emoji" style="--delay: 0.5s; --x: 80%;">🏊</span>
+                <span class="float-emoji" style="--delay: 1.5s; --x: 30%;">🎲</span>
+                <span class="float-emoji" style="--delay: 2.5s; --x: 70%;">🌳</span>
+            </div>
+            <div class="profile-buttons">
+                <button class="profile-btn alma" onclick="switchProfile('alma')">⭐ Alma</button>
+                <button class="profile-btn natalie" onclick="switchProfile('natalie')">🌸 Natalie</button>
+            </div>
         </div>
 
         <!-- Main App -->
         <div id="main-app" style="display: none;">
+            <button class="switch-btn" onclick="showProfileSelector()">← Switch</button>
             <div class="header">
-                <h1 id="header-title">My Vacation</h1>
+                <h1 id="header-title">My Planner</h1>
                 <p class="subtitle">March 19 - April 19</p>
-                <button class="switch-btn" onclick="showProfileSelector()">Switch</button>
             </div>
 
             <!-- Week Selector -->
@@ -693,7 +772,7 @@
 
             document.body.className = `theme-${profile}`;
 
-            const name = profile === 'alma' ? "Alma's Vacation" : "Natalie's Vacation";
+            const name = profile === 'alma' ? "Alma's Planner" : "Natalie's Planner";
             document.getElementById('header-title').textContent = name;
 
             document.getElementById('main-app').style.display = 'block';
