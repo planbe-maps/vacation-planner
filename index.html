@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacation Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+
+        body.theme-alma {
+            background: linear-gradient(135deg, #e8d5f0 0%, #f3e5f5 100%);
+            --primary: #9b59b6;
+            --primary-light: #e1bee7;
+            --primary-dark: #7b1fa2;
+            --primary-gradient: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        body.theme-natalie {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            --primary: #e91e8c;
+            --primary-light: #f8bbd9;
+            --primary-dark: #c2185b;
+            --primary-gradient: linear-gradient(135deg, #ff69b4 0%, #e91e8c 100%);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Profile Selector */
+        .profile-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-btn {
+            padding: 15px 35px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .profile-btn.alma {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+        }
+
+        .profile-btn.natalie {
+            background: linear-gradient(135deg, #ff69b4 0%, #e91e8c 100%);
+            color: white;
+        }
+
+        .profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .profile-btn.active {
+            transform: scale(1.08);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            color: var(--primary-dark);
+        }
+
+        .header .subtitle {
+            color: #888;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+
+        /* Week Selector */
+        .week-selector {
+            margin-bottom: 15px;
+        }
+
+        .week-selector select {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1.1em;
+            border: 3px solid var(--primary-light);
+            border-radius: 15px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b59b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .week-selector select:hover {
+            border-color: var(--primary);
+        }
+
+        .week-selector select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Day Selector */
+        .day-selector {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .day-tab {
+            padding: 10px 8px;
+            border: none;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #666;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .day-tab:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .day-tab.active {
+            background: var(--primary-gradient);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .day-tab.today {
+            outline: 3px solid #4CAF50;
+            outline-offset: 2px;
+            position: relative;
+        }
+
+        .day-tab.today::before {
+            content: 'TODAY';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            font-size: 8px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .day-tab.outside-vacation {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .day-tab .day-name {
+            display: block;
+        }
+
+        .day-tab .day-date {
+            display: block;
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        /* Main Card */
+        .day-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            margin-bottom: 20px;
+        }
+
+        .day-title {
+            text-align: center;
+            font-size: 1.5em;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-light);
+        }
+
+        .day-title .date {
+            display: block;
+            font-size: 0.6em;
+            color: #888;
+            font-weight: normal;
+            margin-top: 5px;
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 1.1em;
+            color: var(--primary-dark);
+            margin: 20px 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header:first-child {
+            margin-top: 0;
+        }
+
+        /* Daily Tasks */
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .task-item:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .task-item.completed {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .task-checkbox {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .task-item.completed .task-checkbox {
+            background: var(--primary);
+            color: white;
+        }
+
+        .task-checkbox::after {
+            content: '✓';
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0;
+        }
+
+        .task-item.completed .task-checkbox::after {
+            opacity: 1;
+        }
+
+        .task-emoji {
+            font-size: 1.4em;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .task-time {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* Activity Picker Dropdown */
+        .activity-picker {
+            margin-bottom: 15px;
+        }
+
+        .activity-picker select {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.1em;
+            border: 3px solid var(--primary-light);
+            border-radius: 15px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b59b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .activity-picker select:hover {
+            border-color: var(--primary);
+        }
+
+        .activity-picker select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+
+        /* Special activity remove button */
+        .special-activity .remove-btn {
+            margin-left: auto;
+            background: rgba(0,0,0,0.1);
+            border: none;
+            color: #999;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .special-activity .remove-btn:hover {
+            background: rgba(0,0,0,0.2);
+            color: #666;
+        }
+
+        /* Hint */
+        .hint {
+            background: #fff9c4;
+            color: #f57f17;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .hint.visible {
+            display: block;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            color: #bbb;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* Clear Button */
+        .clear-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: #ffcdd2;
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Profile Selector -->
+        <div class="profile-selector">
+            <button class="profile-btn alma" onclick="switchProfile('alma')">⭐ Alma</button>
+            <button class="profile-btn natalie" onclick="switchProfile('natalie')">🌸 Natalie</button>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" style="display: none;">
+            <div class="header">
+                <h1 id="header-title">My Vacation</h1>
+                <p class="subtitle">March 19 - April 19</p>
+            </div>
+
+            <!-- Week Selector -->
+            <div class="week-selector">
+                <select id="week-select" onchange="selectWeek(this.value)">
+                    <!-- Generated by JS -->
+                </select>
+            </div>
+
+            <!-- Day Selector Tabs -->
+            <div class="day-selector" id="day-selector">
+                <!-- Generated by JS -->
+            </div>
+
+            <!-- Day Card -->
+            <div class="day-card">
+                <div class="day-title" id="day-title">
+                    Sunday
+                    <span class="date" id="day-date">March 19</span>
+                </div>
+
+                <!-- Daily Tasks -->
+                <div class="section-header">🌟 My Day</div>
+                <div id="daily-tasks">
+                    <!-- Generated by JS -->
+                </div>
+
+                <!-- Placed Weekly Activities -->
+                <div class="section-header">⭐ Special Activities</div>
+                <div id="placed-activities">
+                    <!-- Generated by JS -->
+                </div>
+
+                <div class="activity-picker">
+                    <select id="activity-select" onchange="addWeeklyActivity(this.value)">
+                        <option value="">+ Add an activity...</option>
+                    </select>
+                </div>
+
+                <div id="hint" class="hint">
+                    ✨ Activity added!
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">0 of 5 done!</div>
+            </div>
+
+            <!-- Clear Button -->
+            <button class="clear-btn" onclick="clearDayData()">🗑️ Start Fresh</button>
+        </div>
+    </div>
+
+    <script>
+        // Vacation Configuration
+        const VACATION_START = new Date(2026, 2, 19); // March 19, 2026
+        const VACATION_END = new Date(2026, 3, 19);   // April 19, 2026
+
+        // Generate calendar weeks (Monday to Sunday)
+        function generateWeeks() {
+            const weeks = [];
+
+            // Find the Monday of the week that contains vacation start
+            let firstMonday = new Date(VACATION_START);
+            const dayOfWeek = firstMonday.getDay();
+            // If Sunday (0), go back 6 days; otherwise go back (dayOfWeek - 1) days
+            const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            firstMonday.setDate(firstMonday.getDate() - daysToSubtract);
+
+            let currentStart = new Date(firstMonday);
+            let weekNum = 1;
+
+            while (currentStart <= VACATION_END && weekNum <= 6) {
+                const weekStart = new Date(currentStart);
+                const weekEnd = new Date(currentStart);
+                weekEnd.setDate(weekEnd.getDate() + 6); // Sunday
+
+                weeks.push({
+                    num: weekNum,
+                    start: new Date(weekStart),
+                    end: new Date(weekEnd),
+                    label: `Week ${weekNum}`,
+                    dateRange: `${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)}`
+                });
+
+                currentStart.setDate(currentStart.getDate() + 7);
+                weekNum++;
+            }
+
+            return weeks;
+        }
+
+        function formatShortDate(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${months[date.getMonth()]} ${date.getDate()}`;
+        }
+
+        function formatFullDate(date) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return {
+                dayName: days[date.getDay()],
+                fullDate: `${months[date.getMonth()]} ${date.getDate()}`
+            };
+        }
+
+        function getDateKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function isToday(date) {
+            const today = new Date();
+            return date.getDate() === today.getDate() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getFullYear() === today.getFullYear();
+        }
+
+        function isWithinVacation(date) {
+            return date >= VACATION_START && date <= VACATION_END;
+        }
+
+        function getCurrentWeekIndex() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            for (let i = 0; i < weeks.length; i++) {
+                const start = new Date(weeks[i].start);
+                const end = new Date(weeks[i].end);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                if (today >= start && today <= end) {
+                    return i;
+                }
+            }
+            // If before vacation, return first week
+            if (today < VACATION_START) return 0;
+            // If after vacation, return last week
+            return weeks.length - 1;
+        }
+
+        function getTodayDate() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return today;
+        }
+
+        const weeks = generateWeeks();
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const dayNamesMonFirst = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        const dailyAnchors = {
+            alma: [
+                { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
+                { id: 'outdoor', emoji: '☀️', text: 'Outside Fun', time: '' },
+                { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
+                { id: 'screenfree', emoji: '🎨', text: 'Unplugged Time', time: '' },
+                { id: 'evening', emoji: '🌙', text: 'Wind Down', time: 'Journal, drawing, or music' }
+            ],
+            natalie: [
+                { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
+                { id: 'outdoor', emoji: '☀️', text: 'Outside Fun', time: '' },
+                { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
+                { id: 'screenfree', emoji: '🎨', text: 'Unplugged Time', time: '' },
+                { id: 'evening', emoji: '🌙', text: 'Wind Down', time: 'Quiet play time' }
+            ]
+        };
+
+        const weeklyAnchors = [
+            { id: 'cooking', emoji: '👩‍🍳', text: 'Cooking Adventure', desc: 'Make something yummy together' },
+            { id: 'baking', emoji: '🧁', text: 'Baking Fun', desc: 'Cookies, cakes, or treats' },
+            { id: 'art', emoji: '🎨', text: 'Art Time', desc: 'Drawing, painting, or coloring' },
+            { id: 'crafts', emoji: '✂️', text: 'Crafts', desc: 'Origami, slime, or DIY projects' },
+            { id: 'nature', emoji: '🌳', text: 'Nature Walk', desc: 'Explore outdoors' },
+            { id: 'pool', emoji: '🏊', text: 'Pool Time', desc: 'Swimming and water fun' },
+            { id: 'bikes', emoji: '🚴', text: 'Bike Ride', desc: 'Go for a ride' },
+            { id: 'friend', emoji: '👭', text: 'Friend Hangout', desc: 'Play with a friend' },
+            { id: 'game', emoji: '🎲', text: 'Family Game', desc: 'Board games or cards together' },
+            { id: 'movie', emoji: '🎬', text: 'Movie Time', desc: 'Watch something fun' },
+            { id: 'music', emoji: '🎵', text: 'Music Time', desc: 'Play, sing, or listen' },
+            { id: 'project', emoji: '🔧', text: 'My Project', desc: 'Work on something special' },
+            { id: 'building', emoji: '🧱', text: 'Building', desc: 'Lego, blocks, or construction' },
+            { id: 'science', emoji: '🔬', text: 'Science Fun', desc: 'Experiments and discovery' },
+            { id: 'newplace', emoji: '🗺️', text: 'New Place', desc: 'Visit somewhere new' },
+            { id: 'market', emoji: '🛒', text: 'Market Trip', desc: 'Shopping adventure' },
+            { id: 'picnic', emoji: '🧺', text: 'Picnic', desc: 'Eat outside' },
+            { id: 'dance', emoji: '💃', text: 'Dance Party', desc: 'Move and groove' }
+        ];
+
+        // State
+        let currentProfile = null;
+        let currentWeek = 0;
+        let currentDate = null; // Will store the actual date object
+        let data = {
+            alma: { daily: {}, weekly: {}, weeklyDone: {} },
+            natalie: { daily: {}, weekly: {}, weeklyDone: {} }
+        };
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('vacationPlannerV2');
+            if (saved) {
+                data = JSON.parse(saved);
+                if (!data.alma.weeklyDone) data.alma.weeklyDone = {};
+                if (!data.natalie.weeklyDone) data.natalie.weeklyDone = {};
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('vacationPlannerV2', JSON.stringify(data));
+        }
+
+        // Switch profile
+        function switchProfile(profile) {
+            currentProfile = profile;
+
+            document.querySelectorAll('.profile-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.profile-btn.${profile}`).classList.add('active');
+
+            document.body.className = `theme-${profile}`;
+
+            const name = profile === 'alma' ? "Alma's Vacation" : "Natalie's Vacation";
+            document.getElementById('header-title').textContent = name;
+
+            document.getElementById('main-app').style.display = 'block';
+
+            // Set to current week if within vacation, otherwise first week
+            currentWeek = getCurrentWeekIndex();
+
+            // Set to today if within vacation, otherwise first day of vacation
+            const today = getTodayDate();
+            if (isWithinVacation(today)) {
+                currentDate = new Date(today);
+            } else if (today < VACATION_START) {
+                // Before vacation - show first day
+                currentDate = new Date(VACATION_START);
+            } else {
+                // After vacation - show last day
+                currentDate = new Date(VACATION_END);
+            }
+
+            renderWeekSelector();
+            renderDaySelector();
+            renderDay();
+            renderWeeklyList();
+        }
+
+        // Render week selector
+        function renderWeekSelector() {
+            const select = document.getElementById('week-select');
+            const today = getTodayDate();
+
+            select.innerHTML = weeks.map((week, i) => {
+                const start = new Date(week.start);
+                const end = new Date(week.end);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                const isCurrent = today >= start && today <= end;
+                const currentMarker = isCurrent ? ' 📍 NOW' : '';
+                return `
+                    <option value="${i}" ${i === currentWeek ? 'selected' : ''}>
+                        📅 ${week.label}: ${week.dateRange}${currentMarker}
+                    </option>
+                `;
+            }).join('');
+        }
+
+        // Select a week
+        function selectWeek(weekIndex) {
+            currentWeek = parseInt(weekIndex);
+
+            // Set to first valid day of the week
+            const week = weeks[currentWeek];
+            currentDate = new Date(week.start);
+            if (currentDate < VACATION_START) currentDate = new Date(VACATION_START);
+
+            renderWeekSelector();
+            renderDaySelector();
+            renderDay();
+            renderWeeklyList();
+        }
+
+        // Render day selector tabs
+        function renderDaySelector() {
+            const container = document.getElementById('day-selector');
+            const week = weeks[currentWeek];
+            const today = getTodayDate();
+            let days = [];
+            let d = new Date(week.start);
+            for (let i = 0; i < 7; i++) {
+                days.push(new Date(d));
+                d.setDate(d.getDate() + 1);
+            }
+
+            container.innerHTML = days.map(date => {
+                const dateKey = getDateKey(date);
+                const currentDateKey = getDateKey(currentDate);
+                const isActive = dateKey === currentDateKey;
+                const isTodayDate = isToday(date);
+                const outsideVacation = !isWithinVacation(date);
+
+                return `
+                    <button class="day-tab ${isActive ? 'active' : ''} ${isTodayDate ? 'today' : ''} ${outsideVacation ? 'outside-vacation' : ''}"
+                            onclick="selectDate('${dateKey}')"
+                            ${outsideVacation ? 'disabled' : ''}>
+                        <span class="day-name">${dayNames[date.getDay()]}</span>
+                        <span class="day-date">${date.getDate()}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Select a date
+        function selectDate(dateKey) {
+            const parts = dateKey.split('-');
+            currentDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            renderDaySelector();
+            renderDay();
+            renderWeeklyList();
+        }
+
+        // Get current date key
+        function getCurrentDateKey() {
+            return getDateKey(currentDate);
+        }
+
+        // Render current day content
+        function renderDay() {
+            const dateKey = getCurrentDateKey();
+            const { dayName, fullDate } = formatFullDate(currentDate);
+
+            document.getElementById('day-title').innerHTML = `
+                ${dayName}
+                <span class="date">${fullDate}</span>
+            `;
+
+            // Daily tasks
+            const tasksContainer = document.getElementById('daily-tasks');
+            const anchors = dailyAnchors[currentProfile];
+            const dayData = data[currentProfile].daily[dateKey] || {};
+
+            tasksContainer.innerHTML = anchors.map(anchor => {
+                const isCompleted = dayData[anchor.id] || false;
+                return `
+                    <div class="task-item ${isCompleted ? 'completed' : ''}" onclick="toggleDaily('${anchor.id}')">
+                        <div class="task-checkbox"></div>
+                        <span class="task-emoji">${anchor.emoji}</span>
+                        <div class="task-content">
+                            <div class="task-text">${anchor.text}</div>
+                            ${anchor.time ? `<div class="task-time">${anchor.time}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Placed weekly activities
+            const placedContainer = document.getElementById('placed-activities');
+            const placed = data[currentProfile].weekly[dateKey] || [];
+
+            if (placed.length === 0) {
+                placedContainer.innerHTML = '<div class="empty-state">No special activities yet</div>';
+            } else {
+                const weeklyDone = data[currentProfile].weeklyDone[dateKey] || {};
+                placedContainer.innerHTML = placed.map(anchorId => {
+                    const anchor = weeklyAnchors.find(a => a.id === anchorId);
+                    if (!anchor) return '';
+                    const isDone = weeklyDone[anchorId] || false;
+                    return `
+                        <div class="task-item special-activity ${isDone ? 'completed' : ''}" onclick="toggleWeeklyDone('${anchorId}')">
+                            <div class="task-checkbox"></div>
+                            <span class="task-emoji">${anchor.emoji}</span>
+                            <div class="task-content">
+                                <div class="task-text">${anchor.text}</div>
+                            </div>
+                            <button class="remove-btn" onclick="event.stopPropagation(); removePlaced('${anchorId}')">×</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateProgress();
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const dateKey = getCurrentDateKey();
+            const anchors = dailyAnchors[currentProfile];
+            const dayData = data[currentProfile].daily[dateKey] || {};
+            const completed = anchors.filter(a => dayData[a.id]).length;
+            const total = anchors.length;
+            const percent = (completed / total) * 100;
+
+            document.getElementById('progress-fill').style.width = `${percent}%`;
+            document.getElementById('progress-text').textContent = `${completed} of ${total} done!`;
+        }
+
+        // Render weekly activities dropdown
+        function renderWeeklyList() {
+            const select = document.getElementById('activity-select');
+            const dateKey = getCurrentDateKey();
+            const placed = data[currentProfile].weekly[dateKey] || [];
+
+            select.innerHTML = '<option value="">+ Add an activity...</option>' +
+                weeklyAnchors.map(anchor => {
+                    const isPlaced = placed.includes(anchor.id);
+                    return `<option value="${anchor.id}" ${isPlaced ? 'disabled' : ''}>
+                        ${anchor.emoji} ${anchor.text} - ${anchor.desc}
+                    </option>`;
+                }).join('');
+        }
+
+        // Add weekly activity to current day
+        function addWeeklyActivity(anchorId) {
+            if (!anchorId) return;
+
+            const dateKey = getCurrentDateKey();
+            if (!data[currentProfile].weekly[dateKey]) {
+                data[currentProfile].weekly[dateKey] = [];
+            }
+
+            const placed = data[currentProfile].weekly[dateKey];
+            if (placed.includes(anchorId)) {
+                return;
+            }
+
+            placed.push(anchorId);
+            saveData();
+
+            document.getElementById('activity-select').value = '';
+
+            const hint = document.getElementById('hint');
+            hint.classList.add('visible');
+            setTimeout(() => hint.classList.remove('visible'), 1500);
+
+            renderDay();
+            renderWeeklyList();
+        }
+
+        // Remove placed activity
+        function removePlaced(anchorId) {
+            const dateKey = getCurrentDateKey();
+            const placed = data[currentProfile].weekly[dateKey] || [];
+            data[currentProfile].weekly[dateKey] = placed.filter(id => id !== anchorId);
+            if (data[currentProfile].weeklyDone[dateKey]) {
+                delete data[currentProfile].weeklyDone[dateKey][anchorId];
+            }
+            saveData();
+            renderDay();
+            renderWeeklyList();
+        }
+
+        // Toggle daily task
+        function toggleDaily(anchorId) {
+            const dateKey = getCurrentDateKey();
+            if (!data[currentProfile].daily[dateKey]) {
+                data[currentProfile].daily[dateKey] = {};
+            }
+            data[currentProfile].daily[dateKey][anchorId] = !data[currentProfile].daily[dateKey][anchorId];
+            saveData();
+            renderDay();
+        }
+
+        // Toggle weekly activity done
+        function toggleWeeklyDone(anchorId) {
+            const dateKey = getCurrentDateKey();
+            if (!data[currentProfile].weeklyDone[dateKey]) {
+                data[currentProfile].weeklyDone[dateKey] = {};
+            }
+            data[currentProfile].weeklyDone[dateKey][anchorId] = !data[currentProfile].weeklyDone[dateKey][anchorId];
+            saveData();
+            renderDay();
+        }
+
+        // Clear current day data
+        function clearDayData() {
+            if (confirm('Start fresh? This will clear today\'s tasks and activities.')) {
+                const dateKey = getCurrentDateKey();
+                data[currentProfile].daily[dateKey] = {};
+                data[currentProfile].weekly[dateKey] = [];
+                data[currentProfile].weeklyDone[dateKey] = {};
+                saveData();
+                renderDay();
+                renderWeeklyList();
+            }
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
