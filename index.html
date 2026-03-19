@@ -886,24 +886,24 @@
         ];
 
         const weeklyAnchors = [
-            { id: 'cooking', emoji: '👩‍🍳', text: 'Cooking Adventure', desc: 'Make something yummy together' },
-            { id: 'baking', emoji: '🧁', text: 'Baking Fun', desc: 'Cookies, cakes, or treats' },
-            { id: 'art', emoji: '🎨', text: 'Art Time', desc: 'Drawing, painting, or coloring' },
-            { id: 'crafts', emoji: '✂️', text: 'Crafts', desc: 'Origami, slime, or DIY projects' },
-            { id: 'nature', emoji: '🌳', text: 'Nature Walk', desc: 'Explore outdoors' },
-            { id: 'pool', emoji: '🏊', text: 'Pool Time', desc: 'Swimming and water fun' },
-            { id: 'bikes', emoji: '🚴', text: 'Bike Ride', desc: 'Go for a ride' },
-            { id: 'friend', emoji: '👭', text: 'Friend Hangout', desc: 'Play with a friend' },
-            { id: 'game', emoji: '🎲', text: 'Family Game', desc: 'Board games or cards together' },
-            { id: 'movie', emoji: '🎬', text: 'Movie Time', desc: 'Watch something fun' },
-            { id: 'music', emoji: '🎵', text: 'Music Time', desc: 'Play, sing, or listen' },
-            { id: 'project', emoji: '🔧', text: 'My Project', desc: 'Work on something special' },
-            { id: 'building', emoji: '🧱', text: 'Building', desc: 'Lego, blocks, or construction' },
-            { id: 'science', emoji: '🔬', text: 'Science Fun', desc: 'Experiments and discovery' },
-            { id: 'newplace', emoji: '🗺️', text: 'New Place', desc: 'Visit somewhere new' },
-            { id: 'market', emoji: '🛒', text: 'Market Trip', desc: 'Shopping adventure' },
-            { id: 'picnic', emoji: '🧺', text: 'Picnic', desc: 'Eat outside' },
-            { id: 'dance', emoji: '💃', text: 'Dance Party', desc: 'Move and groove' }
+            { id: 'cooking', emoji: '👩‍🍳', text: 'Cooking Adventure', desc: 'Be a chef! Make something yummy' },
+            { id: 'baking', emoji: '🧁', text: 'Baking Fun', desc: 'Cookies, cakes & sweet treats!' },
+            { id: 'art', emoji: '🎨', text: 'Art Time', desc: 'Let your creativity shine!' },
+            { id: 'crafts', emoji: '✂️', text: 'Crafts', desc: 'Make something cool with your hands' },
+            { id: 'nature', emoji: '🌳', text: 'Nature Walk', desc: 'Discover the outdoors!' },
+            { id: 'pool', emoji: '🏊', text: 'Pool Time', desc: 'Splash around and have fun!' },
+            { id: 'bikes', emoji: '🚴', text: 'Bike Ride', desc: 'Feel the wind in your hair!' },
+            { id: 'friend', emoji: '👭', text: 'Friend Hangout', desc: 'Good times with a buddy!' },
+            { id: 'game', emoji: '🎲', text: 'Family Game', desc: 'Who will win today?' },
+            { id: 'movie', emoji: '🎬', text: 'Movie Time', desc: 'Popcorn ready? Let\'s watch!' },
+            { id: 'music', emoji: '🎵', text: 'Music Time', desc: 'Sing, play, or jam out!' },
+            { id: 'project', emoji: '🔧', text: 'My Project', desc: 'Work on your special creation' },
+            { id: 'building', emoji: '🧱', text: 'Building', desc: 'Build something awesome!' },
+            { id: 'science', emoji: '🔬', text: 'Science Fun', desc: 'Experiment and discover!' },
+            { id: 'newplace', emoji: '🗺️', text: 'New Place', desc: 'Adventure awaits!' },
+            { id: 'market', emoji: '🛒', text: 'Market Trip', desc: 'Explore and find treasures!' },
+            { id: 'picnic', emoji: '🧺', text: 'Picnic', desc: 'Yummy food under the sky!' },
+            { id: 'dance', emoji: '💃', text: 'Dance Party', desc: 'Turn up the music and move!' }
         ];
 
         // State
@@ -1148,7 +1148,7 @@
                 container.innerHTML = '<div style="color: #888; font-size: 0.9em;">All activities added!</div>';
             } else {
                 container.innerHTML = available.map(anchor => `
-                    <button class="activity-chip" onclick="addWeeklyActivity('${anchor.id}')">
+                    <button class="activity-chip" title="${anchor.desc}" onclick="addWeeklyActivity('${anchor.id}')">
                         <span class="chip-emoji">${anchor.emoji}</span>
                         <span class="chip-text">${anchor.text}</span>
                     </button>
