@@ -18,7 +18,7 @@
             transition: background 0.3s;
         }
 
-        body.theme-alma {
+        body.theme-unicorn {
             background: linear-gradient(135deg, #e8d5f0 0%, #f3e5f5 100%);
             --primary: #9b59b6;
             --primary-light: #e1bee7;
@@ -26,12 +26,20 @@
             --primary-gradient: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
         }
 
-        body.theme-natalie {
+        body.theme-flower {
             background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
             --primary: #e91e8c;
             --primary-light: #f8bbd9;
             --primary-dark: #c2185b;
             --primary-gradient: linear-gradient(135deg, #ff69b4 0%, #e91e8c 100%);
+        }
+
+        body.theme-ocean {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            --primary: #0097a7;
+            --primary-light: #b2ebf2;
+            --primary-dark: #006064;
+            --primary-gradient: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
         }
 
         .container {
@@ -129,6 +137,61 @@
             box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.2);
         }
 
+        .theme-label {
+            font-size: 1em;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .theme-picker {
+            display: flex;
+            gap: 12px;
+            margin: 10px 0 20px 0;
+        }
+
+        .theme-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 16px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-option:hover {
+            border-color: #aaa;
+            transform: scale(1.05);
+        }
+
+        .theme-option.selected {
+            border-color: #9b59b6;
+            background: #f3e5f5;
+        }
+
+        .theme-option[data-theme="flower"].selected {
+            border-color: #e91e8c;
+            background: #fce4ec;
+        }
+
+        .theme-option[data-theme="ocean"].selected {
+            border-color: #0097a7;
+            background: #e0f7fa;
+        }
+
+        .theme-avatar {
+            font-size: 2em;
+        }
+
+        .theme-name {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #666;
+            margin-top: 4px;
+        }
+
         .start-btn {
             padding: 18px 45px;
             font-size: 1.3em;
@@ -152,6 +215,17 @@
             text-align: center;
             margin-bottom: 20px;
             padding-top: 35px;
+        }
+
+        .header-name {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header-avatar {
+            font-size: 2em;
         }
 
         .header h1 {
@@ -544,7 +618,24 @@
                 <span class="float-emoji" style="--delay: 2.5s; --x: 70%;">🌳</span>
             </div>
             <div class="name-input-container">
-                <input type="text" id="name-input" class="name-input" placeholder="Enter your name" maxlength="20" onkeypress="if(event.key === 'Enter') submitName()">
+                <input type="text" id="name-input" class="name-input" placeholder="Enter your name" maxlength="20">
+
+                <div class="theme-label">Pick your style:</div>
+                <div class="theme-picker">
+                    <button class="theme-option selected" data-theme="unicorn" onclick="selectTheme('unicorn')">
+                        <span class="theme-avatar">🦄</span>
+                        <span class="theme-name">Unicorn</span>
+                    </button>
+                    <button class="theme-option" data-theme="flower" onclick="selectTheme('flower')">
+                        <span class="theme-avatar">🌸</span>
+                        <span class="theme-name">Flower</span>
+                    </button>
+                    <button class="theme-option" data-theme="ocean" onclick="selectTheme('ocean')">
+                        <span class="theme-avatar">🐬</span>
+                        <span class="theme-name">Ocean</span>
+                    </button>
+                </div>
+
                 <button class="start-btn" onclick="submitName()">Let's Go! 🚀</button>
             </div>
         </div>
@@ -553,7 +644,10 @@
         <div id="main-app" style="display: none;">
             <button class="switch-btn" onclick="showLoginPage()">← Switch</button>
             <div class="header">
-                <h1 id="header-title">My Planner</h1>
+                <div class="header-name">
+                    <span class="header-avatar" id="header-avatar">🦄</span>
+                    <h1 id="header-title">My Planner</h1>
+                </div>
                 <p class="subtitle">March 19 - April 19</p>
             </div>
 
@@ -706,6 +800,14 @@
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const dayNamesMonFirst = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+        // Theme configuration
+        const themes = {
+            unicorn: { avatar: '🦄', name: 'Unicorn' },
+            flower: { avatar: '🌸', name: 'Flower' },
+            ocean: { avatar: '🐬', name: 'Ocean' }
+        };
+        let selectedTheme = 'unicorn';
+
         const dailyAnchors = [
             { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
             { id: 'outdoor', emoji: '☀️', text: 'Outside Fun', time: '' },
@@ -744,12 +846,13 @@
         // Load data from localStorage
         function loadData() {
             const savedProfile = localStorage.getItem('vacationPlannerProfile');
+            const savedTheme = localStorage.getItem('vacationPlannerTheme') || 'unicorn';
             const savedData = localStorage.getItem('vacationPlannerData');
             if (savedData) {
                 data = JSON.parse(savedData);
                 if (!data.weeklyDone) data.weeklyDone = {};
             }
-            return savedProfile;
+            return { profile: savedProfile, theme: savedTheme };
         }
 
         // Save data to localStorage
@@ -757,9 +860,19 @@
             localStorage.setItem('vacationPlannerData', JSON.stringify(data));
         }
 
-        // Save profile name
-        function saveProfile(name) {
+        // Save profile name and theme
+        function saveProfile(name, theme) {
             localStorage.setItem('vacationPlannerProfile', name);
+            localStorage.setItem('vacationPlannerTheme', theme);
+        }
+
+        // Select theme on login page
+        function selectTheme(theme) {
+            selectedTheme = theme;
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('selected');
         }
 
         // Submit name and start
@@ -770,17 +883,19 @@
                 nameInput.focus();
                 return;
             }
-            saveProfile(name);
-            startPlanner(name);
+            saveProfile(name, selectedTheme);
+            startPlanner(name, selectedTheme);
         }
 
-        // Start the planner with given name
-        function startPlanner(name) {
+        // Start the planner with given name and theme
+        function startPlanner(name, theme) {
             currentProfile = name;
+            selectedTheme = theme || 'unicorn';
 
-            document.body.className = 'theme-alma'; // Use purple theme for everyone
+            document.body.className = 'theme-' + selectedTheme;
 
             document.getElementById('header-title').textContent = name + "'s Planner";
+            document.getElementById('header-avatar').textContent = themes[selectedTheme].avatar;
 
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('login-page').style.display = 'none';
@@ -1054,9 +1169,9 @@
         }
 
         // Initialize
-        const savedProfile = loadData();
-        if (savedProfile) {
-            startPlanner(savedProfile);
+        const saved = loadData();
+        if (saved.profile) {
+            startPlanner(saved.profile, saved.theme);
         }
     </script>
 </body>
