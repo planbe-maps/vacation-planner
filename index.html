@@ -95,6 +95,24 @@
             margin-top: 5px;
         }
 
+        .switch-btn {
+            margin-top: 10px;
+            padding: 6px 16px;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .switch-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
         /* Week Selector */
         .week-selector {
             margin-bottom: 15px;
@@ -440,7 +458,7 @@
 <body>
     <div class="container">
         <!-- Profile Selector -->
-        <div class="profile-selector">
+        <div class="profile-selector" id="profile-selector">
             <button class="profile-btn alma" onclick="switchProfile('alma')">⭐ Alma</button>
             <button class="profile-btn natalie" onclick="switchProfile('natalie')">🌸 Natalie</button>
         </div>
@@ -450,6 +468,7 @@
             <div class="header">
                 <h1 id="header-title">My Vacation</h1>
                 <p class="subtitle">March 19 - April 19</p>
+                <button class="switch-btn" onclick="showProfileSelector()">Switch</button>
             </div>
 
             <!-- Week Selector -->
@@ -678,6 +697,7 @@
             document.getElementById('header-title').textContent = name;
 
             document.getElementById('main-app').style.display = 'block';
+            document.getElementById('profile-selector').style.display = 'none';
 
             // Set to current week if within vacation, otherwise first week
             currentWeek = getCurrentWeekIndex();
@@ -937,6 +957,12 @@
                 renderDay();
                 renderWeeklyList();
             }
+        }
+
+        // Show profile selector again
+        function showProfileSelector() {
+            document.getElementById('profile-selector').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
         }
 
         // Initialize
