@@ -16,6 +16,7 @@
             min-height: 100vh;
             padding: 20px;
             transition: background 0.3s;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
         }
 
         body.theme-unicorn {
@@ -1447,7 +1448,10 @@
             document.getElementById('login-page').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('name-input').value = '';
-            // Keep the current theme visual
+            // Reset to neutral background
+            document.body.className = '';
+            // Reset theme picker to first option
+            selectedTheme = 'unicorn';
             updateThemePickerSelection(selectedTheme);
         }
 
