@@ -537,36 +537,53 @@
 
         .available-activities {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 8px;
         }
 
         .activity-chip {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 8px 14px;
-            background: #f0f0f0;
-            border: 2px solid transparent;
-            border-radius: 20px;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #f8f8f8;
+            border: 2px solid #eee;
+            border-radius: 15px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.2s;
+            text-align: left;
         }
 
         .activity-chip:hover {
             background: var(--primary-light);
             border-color: var(--primary);
-            transform: scale(1.05);
+        }
+
+        .activity-chip:active {
+            transform: scale(0.98);
         }
 
         .activity-chip .chip-emoji {
-            font-size: 1.1em;
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .activity-chip .chip-content {
+            flex: 1;
         }
 
         .activity-chip .chip-text {
-            font-weight: 500;
-            color: #555;
+            font-weight: 600;
+            color: #333;
+            display: block;
+        }
+
+        .activity-chip .chip-desc {
+            font-size: 0.85em;
+            color: #777;
+            display: block;
+            margin-top: 2px;
         }
 
 
@@ -1148,9 +1165,12 @@
                 container.innerHTML = '<div style="color: #888; font-size: 0.9em;">All activities added!</div>';
             } else {
                 container.innerHTML = available.map(anchor => `
-                    <button class="activity-chip" title="${anchor.desc}" onclick="addWeeklyActivity('${anchor.id}')">
+                    <button class="activity-chip" onclick="addWeeklyActivity('${anchor.id}')">
                         <span class="chip-emoji">${anchor.emoji}</span>
-                        <span class="chip-text">${anchor.text}</span>
+                        <span class="chip-content">
+                            <span class="chip-text">${anchor.text}</span>
+                            <span class="chip-desc">${anchor.desc}</span>
+                        </span>
                     </button>
                 `).join('');
             }
