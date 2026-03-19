@@ -42,6 +42,14 @@
             --primary-gradient: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
         }
 
+        body.theme-rainbow {
+            background: linear-gradient(135deg, #ffe6e6 0%, #fff0e6 25%, #ffffcc 50%, #e6ffe6 75%, #e6f0ff 100%);
+            --primary: #ff6b6b;
+            --primary-light: #ffd1d1;
+            --primary-dark: #ee5253;
+            --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 75%, #ff9ff3 100%);
+        }
+
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -181,16 +189,15 @@
             background: #e0f7fa;
         }
 
+        .theme-option[data-theme="rainbow"].selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffffcc 50%, #e6f0ff 100%);
+        }
+
         .theme-avatar {
             font-size: 2em;
         }
 
-        .theme-name {
-            font-size: 0.8em;
-            font-weight: 600;
-            color: #666;
-            margin-top: 4px;
-        }
 
         .start-btn {
             padding: 18px 45px;
@@ -226,6 +233,39 @@
 
         .header-avatar {
             font-size: 2em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .header-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .avatar-picker {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .avatar-picker.visible {
+            display: flex;
+        }
+
+        .avatar-option {
+            font-size: 1.8em;
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
         }
 
         .header h1 {
@@ -620,19 +660,19 @@
             <div class="name-input-container">
                 <input type="text" id="name-input" class="name-input" placeholder="Enter your name" maxlength="20">
 
-                <div class="theme-label">Pick your style:</div>
-                <div class="theme-picker">
+                <div class="theme-label">Pick your avatar:</div>
+                <div class="theme-picker" id="login-theme-picker">
                     <button class="theme-option selected" data-theme="unicorn" onclick="selectTheme('unicorn')">
                         <span class="theme-avatar">🦄</span>
-                        <span class="theme-name">Unicorn</span>
                     </button>
                     <button class="theme-option" data-theme="flower" onclick="selectTheme('flower')">
                         <span class="theme-avatar">🌸</span>
-                        <span class="theme-name">Flower</span>
                     </button>
                     <button class="theme-option" data-theme="ocean" onclick="selectTheme('ocean')">
                         <span class="theme-avatar">🐬</span>
-                        <span class="theme-name">Ocean</span>
+                    </button>
+                    <button class="theme-option" data-theme="rainbow" onclick="selectTheme('rainbow')">
+                        <span class="theme-avatar">🌈</span>
                     </button>
                 </div>
 
@@ -645,8 +685,14 @@
             <button class="switch-btn" onclick="showLoginPage()">← Switch</button>
             <div class="header">
                 <div class="header-name">
-                    <span class="header-avatar" id="header-avatar">🦄</span>
+                    <span class="header-avatar" id="header-avatar" onclick="toggleAvatarPicker()">🦄</span>
                     <h1 id="header-title">My Planner</h1>
+                </div>
+                <div class="avatar-picker" id="avatar-picker">
+                    <button class="avatar-option" data-theme="unicorn" onclick="changeAvatar('unicorn')">🦄</button>
+                    <button class="avatar-option" data-theme="flower" onclick="changeAvatar('flower')">🌸</button>
+                    <button class="avatar-option" data-theme="ocean" onclick="changeAvatar('ocean')">🐬</button>
+                    <button class="avatar-option" data-theme="rainbow" onclick="changeAvatar('rainbow')">🌈</button>
                 </div>
                 <p class="subtitle">March 19 - April 19</p>
             </div>
@@ -804,7 +850,8 @@
         const themes = {
             unicorn: { avatar: '🦄', name: 'Unicorn' },
             flower: { avatar: '🌸', name: 'Flower' },
-            ocean: { avatar: '🐬', name: 'Ocean' }
+            ocean: { avatar: '🐬', name: 'Ocean' },
+            rainbow: { avatar: '🌈', name: 'Rainbow' }
         };
         let selectedTheme = 'unicorn';
 
@@ -1166,6 +1213,31 @@
             document.getElementById('login-page').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('name-input').value = '';
+            // Keep the current theme visual
+            updateThemePickerSelection(selectedTheme);
+        }
+
+        // Update theme picker selection
+        function updateThemePickerSelection(theme) {
+            document.querySelectorAll('#login-theme-picker .theme-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            const themeBtn = document.querySelector(`#login-theme-picker .theme-option[data-theme="${theme}"]`);
+            if (themeBtn) themeBtn.classList.add('selected');
+        }
+
+        // Toggle avatar picker in planner
+        function toggleAvatarPicker() {
+            document.getElementById('avatar-picker').classList.toggle('visible');
+        }
+
+        // Change avatar/theme from planner
+        function changeAvatar(theme) {
+            selectedTheme = theme;
+            document.body.className = 'theme-' + theme;
+            document.getElementById('header-avatar').textContent = themes[theme].avatar;
+            document.getElementById('avatar-picker').classList.remove('visible');
+            localStorage.setItem('vacationPlannerTheme', theme);
         }
 
         // Initialize
