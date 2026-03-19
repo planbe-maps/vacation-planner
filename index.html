@@ -878,10 +878,10 @@
         let selectedTheme = 'unicorn';
 
         const dailyAnchors = [
-            { id: 'reading', emoji: '📚', text: 'Book Time', time: '' },
+            { id: 'reading', emoji: '📖', text: 'Book Time', time: '' },
             { id: 'outdoor', emoji: '⛹️‍♀️', text: 'Get Moving', time: '' },
             { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
-            { id: 'screenfree', emoji: '🎨', text: 'Unplugged Time', time: '' },
+            { id: 'screenfree', emoji: '🌿', text: 'Unplugged Time', time: '' },
             { id: 'evening', emoji: '🌙', text: 'Wind Down', time: '' }
         ];
 
@@ -1110,9 +1110,9 @@
                     return `
                         <div class="task-item special-activity ${isDone ? 'completed' : ''}" onclick="toggleWeeklyDone('${anchorId}')">
                             <div class="task-checkbox"></div>
-                            <span class="task-emoji">⭐</span>
+                            <span class="task-emoji">${anchor.emoji}</span>
                             <div class="task-content">
-                                <div class="task-text">${anchor.emoji} ${anchor.text}</div>
+                                <div class="task-text">${anchor.text}</div>
                             </div>
                             <button class="remove-btn" onclick="event.stopPropagation(); removePlaced('${anchorId}')">×</button>
                         </div>
