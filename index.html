@@ -522,6 +522,31 @@
             margin-top: 2px;
         }
 
+        .chore-select {
+            width: 100%;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 0.85em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .chore-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chore-task {
+            flex-wrap: wrap;
+        }
+
+        .chore-task .task-content {
+            width: calc(100% - 80px);
+        }
+
         /* Activity Picker Dropdown */
         .activity-picker {
             margin-top: 15px;
@@ -870,9 +895,27 @@
         const dailyAnchors = [
             { id: 'reading', emoji: '📖', text: 'Book Time', time: '' },
             { id: 'outdoor', emoji: '⛹️‍♀️', text: 'Get Moving', time: '' },
-            { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '' },
+            { id: 'chore', emoji: '🤝', text: 'Helping Out', time: '', hasChoreSelect: true },
             { id: 'screenfree', emoji: '🌿', text: 'Unplugged Time', time: '' },
             { id: 'evening', emoji: '🌙', text: 'Wind Down', time: '' }
+        ];
+
+        const choreOptions = [
+            { category: '🍽️ Kitchen', chores: [
+                'Clear the table after meals',
+                'Sweep the floor after meals',
+                'Put away dishes from the dishwasher',
+                'Restock the fridge with water/soda',
+                'Set the table before meals',
+                'Make breakfast',
+                'Make dinner',
+                'Help unpack groceries'
+            ]},
+            { category: '🛏️ Bedroom & Laundry', chores: [
+                'Make the bed and tidy the room',
+                'Bring dirty laundry to washing machine',
+                'Fold and put away clean clothes'
+            ]}
         ];
 
         const weeklyAnchors = [
@@ -900,7 +943,7 @@
         let currentProfile = null;
         let currentWeek = 0;
         let currentDate = null;
-        let data = { daily: {}, weekly: {}, weeklyDone: {} };
+        let data = { daily: {}, weekly: {}, weeklyDone: {}, selectedChores: {} };
 
         // Load data from localStorage
         function loadData() {
@@ -910,6 +953,7 @@
             if (savedData) {
                 data = JSON.parse(savedData);
                 if (!data.weeklyDone) data.weeklyDone = {};
+                if (!data.selectedChores) data.selectedChores = {};
             }
             return { profile: savedProfile, theme: savedTheme };
         }
@@ -1073,6 +1117,29 @@
 
             tasksContainer.innerHTML = anchors.map(anchor => {
                 const isCompleted = dayData[anchor.id] || false;
+                const selectedChore = data.selectedChores?.[dateKey] || '';
+
+                if (anchor.hasChoreSelect) {
+                    return `
+                        <div class="task-item chore-task ${isCompleted ? 'completed' : ''}">
+                            <div class="task-checkbox" onclick="toggleDaily('${anchor.id}')"></div>
+                            <span class="task-emoji">${anchor.emoji}</span>
+                            <div class="task-content">
+                                <div class="task-text">${anchor.text}</div>
+                                <select class="chore-select" onchange="selectChore(this.value)" onclick="event.stopPropagation()">
+                                    <option value="">Pick a chore...</option>
+                                    ${choreOptions.map(cat => `
+                                        <optgroup label="${cat.category}">
+                                            ${cat.chores.map(chore => `
+                                                <option value="${chore}" ${selectedChore === chore ? 'selected' : ''}>${chore}</option>
+                                            `).join('')}
+                                        </optgroup>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                }
                 return `
                     <div class="task-item ${isCompleted ? 'completed' : ''}" onclick="toggleDaily('${anchor.id}')">
                         <div class="task-checkbox"></div>
@@ -1196,6 +1263,16 @@
             renderDay();
         }
 
+        // Select a chore
+        function selectChore(chore) {
+            const dateKey = getCurrentDateKey();
+            if (!data.selectedChores) {
+                data.selectedChores = {};
+            }
+            data.selectedChores[dateKey] = chore;
+            saveData();
+        }
+
         // Toggle weekly activity done
         function toggleWeeklyDone(anchorId) {
             const dateKey = getCurrentDateKey();
@@ -1214,6 +1291,7 @@
                 data.daily[dateKey] = {};
                 data.weekly[dateKey] = [];
                 data.weeklyDone[dateKey] = {};
+                data.selectedChores[dateKey] = '';
                 saveData();
                 renderDay();
             }
